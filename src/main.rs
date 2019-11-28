@@ -13,9 +13,25 @@ struct Cli {
     api_token: String
 }
 
+struct Credential<'a> {
+  email: &'a str,
+  api_token: &'a str
+}
+
+impl<'a> Credential<'a> {
+  fn secret(&self) -> String {
+    let secret = &format!("{email}:{api_key}", email=self.email, api_key=self.api_token);
+    encode(secret)
+  }
+}
+
 fn main()  {
     let args = Cli::from_args();
-    let secret = encode(&format!("{email}:{api_key}", email=&args.email, api_key=&args.api_token));
+    let credit = Credential {
+      email: &args.email,
+      api_token: &args.api_token
+    };
+    let secret = credit.secret();
     match fetch_issue(&args.issue, &secret) {
       Ok(content) => { println!("{}", content);},
       Err(error) => { println!("{:?}", error); }
