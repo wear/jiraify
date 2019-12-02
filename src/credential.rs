@@ -1,12 +1,19 @@
 use base64::{encode};
+use serde::{Serialize, Deserialize};
 
-pub struct JiraCredential<'a> {
-  email: &'a str,
-  api_token: &'a str
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JiraCredential {
+  pub email: String,
+  pub api_token: String
 }
 
-impl<'a> JiraCredential<'a> {
-  pub fn from(email: &'a str, api_token: &'a str) -> JiraCredential<'a> {
+
+impl ::std::default::Default for JiraCredential {
+    fn default() -> Self { Self { email: "".to_string(), api_token: "".to_string() } }
+}
+
+impl JiraCredential {
+  pub fn from(email: String, api_token: String) -> JiraCredential {
     JiraCredential {
       email,
       api_token
@@ -21,7 +28,7 @@ impl<'a> JiraCredential<'a> {
 
 #[test]
 fn generate_secret() {
-  let credit = JiraCredential::from("fred", "fred");
+  let credit = JiraCredential::from("fred".to_string(), "fred".to_string());
   assert_eq!(credit.secret(), "Basic ZnJlZDpmcmVk");
 }
 

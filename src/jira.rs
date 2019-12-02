@@ -1,8 +1,13 @@
 extern crate reqwest;
+
+pub use crate::credential::JiraCredential;
+
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use serde_json::{Value};
 
-pub fn fetch_issue(issue: &str, secret: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub fn fetch_issue(issue: &str, credential: &JiraCredential) -> Result<String, Box<dyn std::error::Error>> {
+    let secret = credential.secret();
+
     let reqeust_url = format!(
         "https://fariaedu.atlassian.net/rest/api/latest/issue/{}", issue);
     let client = reqwest::Client::new();
