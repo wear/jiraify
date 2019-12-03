@@ -1,50 +1,59 @@
 mod credential;
 mod jira;
+
 pub use crate::credential::JiraCredential;
 
-
 extern crate clap;
-use clap::{Arg, App, SubCommand};
-
+use clap::{Arg, App};
+use std::io;
 
 fn main()  {
-    let mut jira_config: JiraCredential = confy::load("jira-config").unwrap();
+    const JIRACONFIG: &str = "jira-conf";
+
+    let mut jira_config: JiraCredential = confy::load(JIRACONFIG).unwrap();
 
     let matches = App::new("Jiraify")
        .version("1.0")
        .about("Automate move Jira issue to github!")
        .author("Stephen Kong.")
-       .arg(Arg::with_name("issue")
+       .arg(
+            Arg::with_name("issue")
            .short("i")
            .long("issue")
            .takes_value(true)
-           .help("Move issue"))
-       .subcommand(SubCommand::with_name("config")
-           .about("config credentials")
-           .arg(Arg::with_name("jira_email")
-                .required(true)
-                .takes_value(true)
-                .help("Jira email"))
-           .arg(Arg::with_name("jira_token")
-                .required(true)
-                .takes_value(true)
-                .help("Jira token")))
+           .help("Move issue")
+        )
+       .arg(
+            Arg::with_name("config")
+           .short("c")
+           .long("config")
+           .help("Update config")
+        )
        .get_matches();
 
-    if let Some(matches) = matches.subcommand_matches("config") {
-        jira_config.email = matches.value_of("jira_email").unwrap().to_string();
-        jira_config.api_token = matches.value_of("jira_token").unwrap().to_string();
-        confy::store("jira-config", &jira_config);
-    }
 
-    if let issue = matches.value_of("issue") {
-        match jira::fetch_issue(issue.unwrap(), &jira_config) {
-          Ok(content) => { println!("{}", content.replace(" ", "-"));},
-          Err(error) => { println!("{:?}", error); }
+    if matches.is_present("issue") {
+        let issue = matches.value_of("issue").unwrap();
+        match jira::fetch_issue(issue, &jira_config) {
+            Ok(summary) => { println!("issue summary is {}", summary); }
+            Err(error) => { println!("Problem fetch JIRA issue: {:?}", error) },
         }
     }
 
-    println!("{:?}", jira_config);
+
+    if matches.is_present("config") {
+        let mut input = String::new();
+
+        println!("Please input your JIRA email.");
+        io::stdin().read_line(&mut input).expect("Failed to read line");
+        jira_config.email = input.trim().to_string();
+        input.clear();
+        println!("Please input your JIRA api token.");
+        io::stdin().read_line(&mut input).expect("Failed to read line");
+        jira_config.api_token = input.trim().to_string();
+        input.clear();
+        confy::store(JIRACONFIG, &jira_config).unwrap();
+    }
 }
 
 
