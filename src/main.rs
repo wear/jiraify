@@ -1,7 +1,7 @@
 mod credential;
 mod issue_controller;
 
-pub use crate::credential::{JiraCredential, GitbhubCredential};
+pub use crate::credential::{BaseAuthCredential};
 pub use crate::issue_controller::JiraIssue;
 
 extern crate clap;
@@ -9,11 +9,11 @@ use clap::{Arg, App};
 use std::io;
 
 fn main()  {
-    const JIRACONFIG: &str = "jira2-conf";
-    const GITHUBCONFIG: &str = "github2-conf";
+    const JIRACONFIG: &str = "jira-conf";
+    const GITHUBCONFIG: &str = "github-conf";
 
-    let mut jira_config: JiraCredential = confy::load(JIRACONFIG).unwrap();
-    let mut github_config: GitbhubCredential = confy::load(GITHUBCONFIG).unwrap();
+    let mut jira_config: BaseAuthCredential = confy::load(JIRACONFIG).unwrap();
+    let mut github_config: BaseAuthCredential = confy::load(GITHUBCONFIG).unwrap();
 
     let matches = App::new("Jiraify")
        .version("1.0")
@@ -51,19 +51,19 @@ fn main()  {
 
         println!("Please input your JIRA email.");
         io::stdin().read_line(&mut input).expect("Failed to read line");
-        jira_config.email = input.trim().to_string();
+        jira_config.user = input.trim().to_string();
         input.clear();
 
         println!("Please input your JIRA api token.");
         io::stdin().read_line(&mut input).expect("Failed to read line");
-        jira_config.api_token = input.trim().to_string();
+        jira_config.access_token = input.trim().to_string();
         input.clear();
 
         confy::store(JIRACONFIG, &jira_config).unwrap();
 
         println!("Please input your Github user name.");
         io::stdin().read_line(&mut input).expect("Failed to read line");
-        github_config.user_name = input.trim().to_string();
+        github_config.user = input.trim().to_string();
         input.clear();
 
         println!("Please input your Github access token.");

@@ -1,6 +1,6 @@
 extern crate reqwest;
 
-pub use crate::credential::{JiraCredential, GitbhubCredential};
+pub use crate::credential::{BaseAuthCredential};
 
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use serde_json::{Value};
@@ -47,7 +47,7 @@ const JIRAENDPOINR: &str = "https://fariaedu.atlassian.net/rest/api/latest";
 const GIRHUBENDPOINR: &str = "https://api.github.com/repos/wear";
 
 
-pub fn fetch_issue(issue: &str, credential: &JiraCredential) -> Result<JiraIssue, Box<dyn std::error::Error>> {
+pub fn fetch_issue(issue: &str, credential: &BaseAuthCredential) -> Result<JiraIssue, Box<dyn std::error::Error>> {
     let secret = credential.secret();
 
     let reqeust_url = format!(
@@ -76,7 +76,7 @@ pub fn fetch_issue(issue: &str, credential: &JiraCredential) -> Result<JiraIssue
 }
 
 
-pub fn create_issue(issue: &JiraIssue, credential: &GitbhubCredential) -> Result<String, Box<dyn std::error::Error>> {
+pub fn create_issue(issue: &JiraIssue, credential: &BaseAuthCredential) -> Result<String, Box<dyn std::error::Error>> {
     let secret = credential.secret();
 
     let reqeust_url = format!("{}/jiraify/issues",GIRHUBENDPOINR);
